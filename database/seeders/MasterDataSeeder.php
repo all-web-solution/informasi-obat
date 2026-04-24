@@ -21,7 +21,8 @@ class MasterDataSeeder extends Seeder
             Pasien::query()->delete();
 
             $pasiens = collect($this->pasiens())->map(fn (array $data) => Pasien::create($data));
-            $obats = collect($this->obats())->map(function (array $data) {
+
+            collect($this->obats())->each(function (array $data) {
                 $info = $data['informasi'];
                 unset($data['informasi']);
 
@@ -30,11 +31,9 @@ class MasterDataSeeder extends Seeder
                 InformasiObat::create(array_merge($info, [
                     'obat_id' => $obat->id,
                 ]));
-
-                return $obat;
             });
 
-            foreach ($this->pemberianObats($pasiens, $obats) as $data) {
+            foreach ($this->pemberianObats($pasiens) as $data) {
                 PemberianObat::create($data);
             }
         });
@@ -95,46 +94,68 @@ class MasterDataSeeder extends Seeder
         ];
     }
 
-    private function pemberianObats($pasiens, $obats): array
+    private function pemberianObats($pasiens): array
     {
-        $diagnosa = [
-            'Demam dan nyeri kepala sejak dua hari.',
-            'Batuk pilek disertai tenggorokan tidak nyaman.',
-            'Gatal dan bersin karena alergi.',
-            'Nyeri ulu hati dan mual setelah makan terlambat.',
-            'Hipertensi tidak terkontrol.',
-            'Keluhan gula darah tinggi dan mudah haus.',
-            'Sesak ringan berulang sesuai riwayat bronkospasme.',
-            'Nyeri otot setelah aktivitas berat.',
-            'Kontrol kolesterol rutin.',
-            'Diare cair sejak satu hari.',
+        $templates = [
+            [
+                'obat_aturan_pakai' => "Paracetamol 500 mg tablet\nAturan pakai: 3 x 1 tablet sesudah makan bila demam atau nyeri.\nJumlah: 10 tablet.",
+                'diagnosa_keluhan' => 'Demam dan nyeri kepala sejak dua hari.',
+            ],
+            [
+                'obat_aturan_pakai' => "Amoxicillin 500 mg kapsul\nAturan pakai: 3 x 1 kapsul sesudah makan selama 5 hari.\nJumlah: 15 kapsul.\nCatatan: antibiotik harus dihabiskan.",
+                'diagnosa_keluhan' => 'Infeksi saluran napas atas dengan dahak kekuningan.',
+            ],
+            [
+                'obat_aturan_pakai' => "Cetirizine 10 mg tablet\nAturan pakai: 1 x 1 tablet malam hari bila gatal atau bersin.\nJumlah: 7 tablet.",
+                'diagnosa_keluhan' => 'Gatal dan bersin karena alergi.',
+            ],
+            [
+                'obat_aturan_pakai' => "Omeprazole 20 mg kapsul\nAturan pakai: 1 x 1 kapsul pagi sebelum makan selama 14 hari.\nJumlah: 14 kapsul.",
+                'diagnosa_keluhan' => 'Nyeri ulu hati dan mual setelah makan terlambat.',
+            ],
+            [
+                'obat_aturan_pakai' => "Amlodipine 5 mg tablet\nAturan pakai: 1 x 1 tablet malam hari pada jam yang sama setiap hari.\nJumlah: 30 tablet.",
+                'diagnosa_keluhan' => 'Hipertensi tidak terkontrol.',
+            ],
+            [
+                'obat_aturan_pakai' => "Metformin 500 mg tablet\nAturan pakai: 2 x 1 tablet sesudah makan pagi dan malam.\nJumlah: 30 tablet.",
+                'diagnosa_keluhan' => 'Keluhan gula darah tinggi dan mudah haus.',
+            ],
+            [
+                'obat_aturan_pakai' => "Salbutamol 2 mg tablet\nAturan pakai: 3 x 1 tablet bila sesak sesuai anjuran tenaga kesehatan.\nJumlah: 10 tablet.",
+                'diagnosa_keluhan' => 'Sesak ringan berulang sesuai riwayat bronkospasme.',
+            ],
+            [
+                'obat_aturan_pakai' => "Ibuprofen 400 mg tablet\nAturan pakai: 2 x 1 tablet sesudah makan bila nyeri.\nJumlah: 10 tablet.",
+                'diagnosa_keluhan' => 'Nyeri otot setelah aktivitas berat.',
+            ],
+            [
+                'obat_aturan_pakai' => "Simvastatin 20 mg tablet\nAturan pakai: 1 x 1 tablet malam hari.\nJumlah: 30 tablet.",
+                'diagnosa_keluhan' => 'Kontrol kolesterol rutin.',
+            ],
+            [
+                'obat_aturan_pakai' => "Oralit sachet\nAturan pakai: larutkan 1 sachet dalam 200 ml air matang, diminum setiap selesai BAB cair.\nJumlah: 5 sachet.",
+                'diagnosa_keluhan' => 'Diare cair sejak satu hari.',
+            ],
         ];
 
         $data = [];
 
         for ($i = 0; $i < 24; $i++) {
+            $template = $templates[$i % count($templates)];
             $pasien = $pasiens[$i % $pasiens->count()];
-            $obat = $obats[$i % $obats->count()];
-            $hari = ($i * 3) + 1;
 
             $data[] = [
                 'pasien_id' => $pasien->id,
-                'obat_id' => $obat->id,
-                'jumlah' => match ($obat->bentuk_sediaan) {
-                    'sachet' => random_int(3, 8),
-                    default => random_int(5, 30),
-                },
-                'berapa_kali_sehari' => random_int(1, 3),
-                'sebelum_sesudah_makan' => collect(['sebelum makan', 'sesudah makan', 'tidak berpengaruh'])->random(),
-                'lama_penggunaan_hari' => random_int(3, 14),
+                'obat_aturan_pakai' => $template['obat_aturan_pakai'],
+                'tanggal_pemberian' => Carbon::now()->subDays(($i * 3) + 1)->format('Y-m-d'),
+                'diagnosa_keluhan' => $template['diagnosa_keluhan'],
                 'informasi_tambahan' => collect([
                     'Diminum sesuai aturan pakai.',
-                    'Hentikan bila muncul reaksi alergi dan segera konsultasi.',
                     'Kontrol kembali bila keluhan belum membaik.',
                     'Perbanyak minum air putih dan istirahat cukup.',
+                    'Segera kembali bila muncul tanda bahaya atau reaksi alergi.',
                 ])->random(),
-                'tanggal_pemberian' => Carbon::now()->subDays($hari)->format('Y-m-d'),
-                'diagnosa_keluhan' => $diagnosa[$i % count($diagnosa)],
             ];
         }
 

@@ -50,9 +50,7 @@
         <tr>
             <th>No</th>
             <th>Tanggal</th>
-            <th>Obat</th>
-            <th>Jumlah</th>
-            <th>Aturan Pakai</th>
+            <th>Obat dan Aturan Pakai</th>
             <th>Diagnosa/Keluhan</th>
         </tr>
     </thead>
@@ -61,17 +59,12 @@
             <tr>
                 <td>{{ $index + 1 }}</td>
                 <td>{{ $item->tanggal_pemberian ? \Carbon\Carbon::parse($item->tanggal_pemberian)->format('d/m/Y') : '-' }}</td>
-                <td>
-                    <strong>{{ $item->nama_obat_display }}</strong><br>
-                    <small>{{ $item->detail_obat_display }}</small>
-                </td>
-                <td>{{ $item->jumlah }}</td>
-                <td>{{ $item->aturan_pakai_display }}</td>
-                <td>{{ $item->diagnosa_keluhan }}</td>
+                <td style="white-space: pre-line;">{{ $item->obat_aturan_pakai }}</td>
+                <td style="white-space: pre-line;">{{ $item->diagnosa_keluhan }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="6">Belum ada riwayat pemberian obat.</td>
+                <td colspan="4">Belum ada riwayat pemberian obat.</td>
             </tr>
         @endforelse
     </tbody>

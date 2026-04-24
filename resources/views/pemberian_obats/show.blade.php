@@ -5,15 +5,13 @@
 @section('page-description', 'Informasi detail pemberian obat dan edukasi pasien')
 
 @section('content')
-@php
-    $info = $pemberianObat->informasiLengkap();
-@endphp
-
 <div class="native-card">
     <div class="native-card-header">
         <div>
             <h1 class="native-card-title">Detail Pemberian Obat</h1>
-            <p class="native-card-subtitle">Detail pasien, obat, aturan pakai, dan informasi edukasi.</p>
+            <p class="native-card-subtitle">
+                Detail pasien, obat dan aturan pakai, diagnosa, serta informasi tambahan.
+            </p>
         </div>
 
         <div class="native-actions">
@@ -26,7 +24,9 @@
     <div class="native-detail-grid">
         <div class="native-detail-item">
             <div class="native-detail-label">Tanggal Pemberian</div>
-            <div class="native-detail-value">{{ \Carbon\Carbon::parse($pemberianObat->tanggal_pemberian)->format('d/m/Y') }}</div>
+            <div class="native-detail-value">
+                {{ \Carbon\Carbon::parse($pemberianObat->tanggal_pemberian)->format('d/m/Y') }}
+            </div>
         </div>
 
         <div class="native-detail-item">
@@ -39,86 +39,24 @@
             </div>
         </div>
 
-        <div class="native-detail-item">
-            <div class="native-detail-label">Obat</div>
-            <div class="native-detail-value">
-                <div class="medicine-card-inline">
-                    <div class="medicine-icon"><i class="fas fa-capsules"></i></div>
-                    <div>
-                        <div class="medicine-name">{{ $pemberianObat->nama_obat_display }}</div>
-                        <div class="medicine-meta">{{ $pemberianObat->detail_obat_display }}</div>
-                        <div class="medicine-badges">
-                            <span class="medicine-badge">{{ $pemberianObat->jumlah }} unit diberikan</span>
-                        </div>
-                    </div>
-                </div>
+        <div class="native-detail-item" style="grid-column: 1 / -1;">
+            <div class="native-detail-label">Obat dan Aturan Pakai</div>
+            <div class="native-detail-value" style="white-space: pre-line;">
+                {{ $pemberianObat->obat_aturan_pakai }}
             </div>
-        </div>
-
-        <div class="native-detail-item">
-            <div class="native-detail-label">Aturan Pakai</div>
-            <div class="native-detail-value">{{ $pemberianObat->aturan_pakai_display }}</div>
         </div>
 
         <div class="native-detail-item" style="grid-column: 1 / -1;">
             <div class="native-detail-label">Diagnosa/Keluhan</div>
-            <div class="native-detail-value">{{ $pemberianObat->diagnosa_keluhan }}</div>
+            <div class="native-detail-value" style="white-space: pre-line;">
+                {{ $pemberianObat->diagnosa_keluhan }}
+            </div>
         </div>
 
         <div class="native-detail-item" style="grid-column: 1 / -1;">
             <div class="native-detail-label">Informasi Tambahan</div>
-            <div class="native-detail-value">{{ $pemberianObat->informasi_tambahan ?: '-' }}</div>
-        </div>
-    </div>
-</div>
-
-<div class="native-card">
-    <div class="native-card-header">
-        <div>
-            <h2 class="native-card-title">Informasi Edukasi Obat</h2>
-            <p class="native-card-subtitle">Informasi ini ditampilkan berdasarkan master informasi obat.</p>
-        </div>
-    </div>
-
-    <div class="native-detail-grid">
-        <div class="native-detail-item">
-            <div class="native-detail-label">Indikasi</div>
-            <div class="native-detail-value">{{ $info->indikasi }}</div>
-        </div>
-
-        <div class="native-detail-item">
-            <div class="native-detail-label">Efek Samping Umum</div>
-            <div class="native-detail-value">{{ $info->efek_samping }}</div>
-        </div>
-
-        <div class="native-detail-item">
-            <div class="native-detail-label">Tanda Bahaya</div>
-            <div class="native-detail-value">{{ $info->tanda_bahaya }}</div>
-        </div>
-
-        <div class="native-detail-item">
-            <div class="native-detail-label">Penyimpanan</div>
-            <div class="native-detail-value">{{ $info->penyimpanan }}</div>
-        </div>
-
-        <div class="native-detail-item">
-            <div class="native-detail-label">Interaksi Obat</div>
-            <div class="native-detail-value">{{ $info->interaksi_obat }}</div>
-        </div>
-
-        <div class="native-detail-item">
-            <div class="native-detail-label">Interaksi Makanan</div>
-            <div class="native-detail-value">{{ $info->interaksi_makanan }}</div>
-        </div>
-
-        <div class="native-detail-item" style="grid-column: 1 / -1;">
-            <div class="native-detail-label">Hal Khusus</div>
-            <div class="native-detail-value">
-                @forelse($info->hal_khusus as $item)
-                    <span class="native-badge">{{ $item }}</span>
-                @empty
-                    -
-                @endforelse
+            <div class="native-detail-value" style="white-space: pre-line;">
+                {{ $pemberianObat->informasi_tambahan ?: '-' }}
             </div>
         </div>
     </div>
