@@ -1,7 +1,7 @@
 @extends('layouts.print')
 
 @section('title', 'Cetak Dashboard')
-@section('print-title', 'Dashboard Sistem Informasi Obat')
+@section('print-title', 'Dashboard Apotek Singkut Farma')
 @section('print-subtitle', 'Ringkasan pasien, obat, stok, dan pemberian obat')
 
 @section('content')

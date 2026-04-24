@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Sistem Informasi Obat')</title>
+    <title>@yield('title', 'Apotek Singkut Farma')</title>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -24,7 +24,7 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <i class="fas fa-notes-medical" style="font-size: 2.5rem; margin-bottom: 10px;"></i>
-            <h3>Sistem Informasi Obat</h3>
+            <h3>Apotek Singkut Farma</h3>
             <p>Pemberian Informasi Obat</p>
         </div>
 
@@ -96,7 +96,7 @@
                     <i class="fas fa-bars"></i>
                 </div>
                 <div class="top-title">
-                    <h5>@yield('page-title', 'Sistem Informasi Obat')</h5>
+                    <h5>@yield('page-title', 'Apotek Singkut Farma')</h5>
                     <span>@yield('page-description', 'Pemberian informasi obat dan edukasi pasien')</span>
                 </div>
             </div>
@@ -130,7 +130,7 @@
         </div>
 
         <div class="footer">
-            <p class="mb-0">&copy; {{ date('Y') }} Sistem Informasi Obat | Pemberian Informasi Obat</p>
+            <p class="mb-0">&copy; {{ date('Y') }} Apotek Singkut Farma | Pemberian Informasi Obat</p>
         </div>
     </div>
 

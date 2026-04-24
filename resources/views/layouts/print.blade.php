@@ -23,7 +23,7 @@
                     <i class="fas fa-notes-medical"></i>
                 </div>
                 <div>
-                    <h1>@yield('print-title', 'Sistem Informasi Obat')</h1>
+                    <h1>@yield('print-title', 'Apotek Singkut Farma')</h1>
                     <p>@yield('print-subtitle', 'Pemberian Informasi Obat')</p>
                 </div>
             </div>
@@ -39,7 +39,7 @@
         @yield('content')
 
         <div class="print-footer">
-            Dokumen ini dibuat otomatis oleh Sistem Informasi Obat.
+            Dokumen ini dibuat otomatis oleh Sistem Informasi Obat Apotek Singkut Farma.
         </div>
     </div>
 </body>

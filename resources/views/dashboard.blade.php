@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard - Sistem Informasi Obat')
+@section('title', 'Dashboard - Apotek Singkut Farma')
 @section('page-title', 'Dashboard')
 @section('page-description', 'Ringkasan data pasien, obat, stok, dan pemberian obat')
 
@@ -8,7 +8,7 @@
 <div class="dashboard-hero">
     <div class="dashboard-hero-content">
         <div>
-            <h1>Dashboard Sistem Informasi Obat</h1>
+            <h1>Dashboard Apotek Singkut Farma</h1>
             <p>
                 Pantau data pasien, master obat, stok kritis, dan riwayat pemberian obat terbaru
                 dalam satu halaman ringkas.
