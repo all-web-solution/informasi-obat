@@ -387,6 +387,13 @@
 
             <div class="sidebar-section-title">Akun</div>
 
+            <div class="sidebar-menu-item {{ request()->routeIs('profile.*') ? 'active' : '' }}">
+                <a href="{{ route('profile.edit') }}">
+                    <i class="fas fa-user-cog"></i>
+                    <span>Edit Profile</span>
+                </a>
+            </div>
+
             <div class="sidebar-menu-item">
                 <form method="POST" action="{{ route('logout') }}" class="sidebar-logout-form">
                     @csrf
@@ -414,7 +421,9 @@
             </div>
 
             <div class="user-info">
-                <span>{{ auth()->user()->name ?? 'Admin Farmasi' }}</span>
+                <a href="{{ route('profile.edit') }}" style="color:#1a5f1a;text-decoration:none;font-weight:700;">
+                    {{ auth()->user()->name ?? 'Admin Farmasi' }}
+                </a>
                 <div class="user-avatar">
                     <i class="fas fa-user"></i>
                 </div>

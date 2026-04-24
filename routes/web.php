@@ -6,6 +6,7 @@ use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\ObatController;
 use App\Http\Controllers\PasienController;
 use App\Http\Controllers\PemberianObatController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
@@ -22,12 +23,13 @@ Route::post('/logout', [LoginController::class, 'destroy'])
 Route::middleware('auth')->group(function () {
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
     Route::resource('pasiens', PasienController::class);
     Route::resource('obats', ObatController::class);
     Route::resource('pemberian_obats', PemberianObatController::class);
-
-    Route::get('/get-obat-info/{id}', [PemberianObatController::class, 'getObatInfo'])
-        ->name('obats.info');
 
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan');
 
