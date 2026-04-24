@@ -10,13 +10,26 @@ class UserSeeder extends Seeder
 {
     public function run(): void
     {
-        User::updateOrCreate(
-            ['email' => 'admin@gmail.com'],
+        $users = [
             [
+                'email' => 'admin@gmail.com',
                 'name' => '調剤事務',
-                'password' => Hash::make('password'),
-                'email_verified_at' => now(),
-            ]
-        );
+            ],
+            [
+                'email' => 'dev@allwebdevelopment.com',
+                'name' => 'CV All Web Development',
+            ],
+        ];
+
+        foreach ($users as $user) {
+            User::updateOrCreate(
+                ['email' => $user['email']],
+                [
+                    'name' => $user['name'],
+                    'password' => Hash::make('password'),
+                    'email_verified_at' => now(),
+                ]
+            );
+        }
     }
 }
