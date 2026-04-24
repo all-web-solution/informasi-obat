@@ -1,100 +1,97 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Pemberian Obat')
-
 @section('content')
-<div class="row">
-    <div class="col-md-12">
-        <div class="form-card">
-            <h4 class="mb-4"><i class="fas fa-edit"></i> Form Edit Pemberian Obat</h4>
-            
-            <form action="{{ route('pemberian_obats.update', $pemberianObat->id) }}" method="POST">
-                @csrf
-                @method('PUT')
-                
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Pilih Pasien <span class="text-danger">*</span></label>
-                        <select name="pasien_id" class="form-select @error('pasien_id') is-invalid @enderror" required>
-                            <option value="">Pilih Pasien</option>
-                            @foreach($pasiens as $pasien)
-                                <option value="{{ $pasien->id }}" {{ old('pasien_id', $pemberianObat->pasien_id) == $pasien->id ? 'selected' : '' }}>
-                                    {{ $pasien->nama }} ({{ $pasien->umur }} th, {{ $pasien->jenis_kelamin }})
-                                </option>
-                            @endforeach
-                        </select>
-                        @error('pasien_id')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label">Tanggal Pemberian <span class="text-danger">*</span></label>
-                        <input type="date" name="tanggal_pemberian" class="form-control @error('tanggal_pemberian') is-invalid @enderror" value="{{ old('tanggal_pemberian', $pemberianObat->tanggal_pemberian) }}" required>
-                        @error('tanggal_pemberian')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Nama Obat <span class="text-danger">*</span></label>
-                        <input type="text" name="obat" class="form-control @error('obat') is-invalid @enderror" value="{{ old('obat', $pemberianObat->obat) }}" required>
-                        @error('obat')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Diagnosa / Keluhan <span class="text-danger">*</span></label>
-                        <textarea name="diagnosa_keluhan" class="form-control @error('diagnosa_keluhan') is-invalid @enderror" rows="2" required>{{ old('diagnosa_keluhan', $pemberianObat->diagnosa_keluhan) }}</textarea>
-                        @error('diagnosa_keluhan')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                </div>
-                
-                <div class="card-header mb-3 mt-3" style="background: #e8f5e9; color: #1a5f1a;">
-                    <i class="fas fa-clock"></i> Aturan Penggunaan
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Berapa Kali Sehari <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="number" name="berapa_kali_sehari" class="form-control @error('berapa_kali_sehari') is-invalid @enderror" min="1" max="10" value="{{ old('berapa_kali_sehari', $pemberianObat->berapa_kali_sehari) }}" required>
-                            <span class="input-group-text">x/hari</span>
-                        </div>
-                        @error('berapa_kali_sehari')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Waktu Konsumsi <span class="text-danger">*</span></label>
-                        <select name="sebelum_sesudah_makan" class="form-select @error('sebelum_sesudah_makan') is-invalid @enderror" required>
-                            <option value="sebelum makan" {{ old('sebelum_sesudah_makan', $pemberianObat->sebelum_sesudah_makan) == 'sebelum makan' ? 'selected' : '' }}>Sebelum Makan</option>
-                            <option value="sesudah makan" {{ old('sebelum_sesudah_makan', $pemberianObat->sebelum_sesudah_makan) == 'sesudah makan' ? 'selected' : '' }}>Sesudah Makan</option>
-                            <option value="tidak berpengaruh" {{ old('sebelum_sesudah_makan', $pemberianObat->sebelum_sesudah_makan) == 'tidak berpengaruh' ? 'selected' : '' }}>Tidak Berpengaruh</option>
-                        </select>
-                        @error('sebelum_sesudah_makan')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                    
-                    <div class="col-md-4 mb-3">
-                        <label class="form-label">Lama Penggunaan <span class="text-danger">*</span></label>
-                        <div class="input-group">
-                            <input type="number" name="lama_penggunaan_hari" class="form-control @error('lama_penggunaan_hari') is-invalid @enderror" min="1" max="365" value="{{ old('lama_penggunaan_hari', $pemberianObat->lama_penggunaan_hari) }}" required>
-                            <span class="input-group-text">hari</span>
-                        </div>
-                        @error('lama_penggunaan_hari')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label">Informasi Tambahan</label>
-                        <textarea name="informasi_tambahan" class="form-control" rows="2" placeholder="Contoh: Minum air putih yang cukup, Jangan dikonsumsi bersamaan dengan obat lain, dll">{{ old('informasi_tambahan', $pemberianObat->informasi_tambahan) }}</textarea>
-                        <small class="text-muted">Informasi tambahan untuk pasien (opsional)</small>
-                    </div>
-                </div>
-                
-                <div class="d-flex justify-content-end mt-4">
-                    <a href="{{ route('pemberian_obats.index') }}" class="btn btn-secondary me-2">Batal</a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-save"></i> Update Pemberian Obat
-                    </button>
-                </div>
-            </form>
+<div class="native-card">
+    <div class="native-card-header">
+        <div>
+            <h1 class="native-card-title">Edit Pemberian Obat</h1>
+            <p class="native-card-subtitle">Perbarui data pemberian obat pasien</p>
+        </div>
+
+        <div class="native-actions">
+            <a href="{{ route('pemberian_obats.show', $pemberianObat) }}" class="native-btn native-btn-secondary">Kembali</a>
         </div>
     </div>
+
+    @if(session('error'))
+        <div class="native-alert native-alert-danger">{{ session('error') }}</div>
+    @endif
+
+    @if ($errors->any())
+        <div class="native-alert native-alert-danger">{{ $errors->first() }}</div>
+    @endif
+
+    <form method="POST" action="{{ route('pemberian_obats.update', $pemberianObat) }}">
+        @csrf
+        @method('PUT')
+
+        <div class="native-form-grid">
+            <div class="native-form-group">
+                <label>Pasien</label>
+                <select name="pasien_id" required>
+                    @foreach($pasiens as $pasien)
+                        <option value="{{ $pasien->id }}" @selected(old('pasien_id', $pemberianObat->pasien_id) == $pasien->id)>
+                            {{ $pasien->nama }} - {{ $pasien->umur }} tahun
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="native-form-group">
+                <label>Obat</label>
+                <select name="obat_id" required>
+                    @foreach($obats as $obat)
+                        <option value="{{ $obat->id }}" @selected(old('obat_id', $pemberianObat->obat_id) == $obat->id)>
+                            {{ $obat->nama_obat }} {{ $obat->kekuatan_dosis }} - {{ $obat->bentuk_sediaan }} | Stok: {{ $obat->stok }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="native-form-group">
+                <label>Jumlah</label>
+                <input type="number" name="jumlah" value="{{ old('jumlah', $pemberianObat->jumlah) }}" min="1" required>
+            </div>
+
+            <div class="native-form-group">
+                <label>Tanggal Pemberian</label>
+                <input type="date" name="tanggal_pemberian" value="{{ old('tanggal_pemberian', \Carbon\Carbon::parse($pemberianObat->tanggal_pemberian)->format('Y-m-d')) }}" required>
+            </div>
+
+            <div class="native-form-group">
+                <label>Berapa Kali Sehari</label>
+                <input type="number" name="berapa_kali_sehari" value="{{ old('berapa_kali_sehari', $pemberianObat->berapa_kali_sehari) }}" min="1" max="10" required>
+            </div>
+
+            <div class="native-form-group">
+                <label>Waktu Minum</label>
+                <select name="sebelum_sesudah_makan" required>
+                    <option value="sebelum makan" @selected(old('sebelum_sesudah_makan', $pemberianObat->sebelum_sesudah_makan) === 'sebelum makan')>Sebelum makan</option>
+                    <option value="sesudah makan" @selected(old('sebelum_sesudah_makan', $pemberianObat->sebelum_sesudah_makan) === 'sesudah makan')>Sesudah makan</option>
+                    <option value="tidak berpengaruh" @selected(old('sebelum_sesudah_makan', $pemberianObat->sebelum_sesudah_makan) === 'tidak berpengaruh')>Tidak berpengaruh</option>
+                </select>
+            </div>
+
+            <div class="native-form-group">
+                <label>Lama Penggunaan Hari</label>
+                <input type="number" name="lama_penggunaan_hari" value="{{ old('lama_penggunaan_hari', $pemberianObat->lama_penggunaan_hari) }}" min="1" max="365" required>
+            </div>
+
+            <div class="native-form-group">
+                <label>Diagnosa/Keluhan</label>
+                <textarea name="diagnosa_keluhan" rows="3" required>{{ old('diagnosa_keluhan', $pemberianObat->diagnosa_keluhan) }}</textarea>
+            </div>
+
+            <div class="native-form-group" style="grid-column: 1 / -1;">
+                <label>Informasi Tambahan</label>
+                <textarea name="informasi_tambahan" rows="3">{{ old('informasi_tambahan', $pemberianObat->informasi_tambahan) }}</textarea>
+            </div>
+        </div>
+
+        <div class="native-actions">
+            <a href="{{ route('pemberian_obats.show', $pemberianObat) }}" class="native-btn native-btn-secondary">Batal</a>
+            <button type="submit" class="native-btn native-btn-primary">Simpan Perubahan</button>
+        </div>
+    </form>
 </div>
 @endsection

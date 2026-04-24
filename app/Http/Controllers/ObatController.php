@@ -2,187 +2,175 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Obat;
 use App\Models\InformasiObat;
+use App\Models\Obat;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\View\View;
 
 class ObatController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         $query = Obat::with('informasiObat');
 
-        // Filter berdasarkan nama obat
         if ($request->filled('filter_nama_obat')) {
             $query->where('nama_obat', 'like', '%' . $request->filter_nama_obat . '%');
         }
 
-        // Filter berdasarkan bentuk sediaan
         if ($request->filled('filter_bentuk')) {
             $query->where('bentuk_sediaan', $request->filter_bentuk);
         }
 
-        // Filter berdasarkan stok (menipis)
         if ($request->filled('filter_stok')) {
-            if ($request->filter_stok == 'menipis') {
-                $query->where('stok', '<', 10);
-            } elseif ($request->filter_stok == 'habis') {
-                $query->where('stok', 0);
-            } elseif ($request->filter_stok == 'tersedia') {
-                $query->where('stok', '>', 0);
-            }
+            match ($request->filter_stok) {
+                'menipis' => $query->where('stok', '<', 10)->where('stok', '>', 0),
+                'habis' => $query->where('stok', 0),
+                'tersedia' => $query->where('stok', '>', 0),
+                default => null,
+            };
         }
 
-        // Filter berdasarkan range stok
-        if ($request->filled('filter_stok_min')) {
-            $query->where('stok', '>=', $request->filter_stok_min);
-        }
-        if ($request->filled('filter_stok_max')) {
-            $query->where('stok', '<=', $request->filter_stok_max);
-        }
-
-        $obats = $query->latest()->paginate(10);
-        $obats->appends($request->all());
+        $obats = $query
+            ->orderBy('nama_obat')
+            ->paginate(10)
+            ->withQueryString();
 
         return view('obats.index', compact('obats'));
     }
-    public function cetak($id)
-    {
-        $obat = Obat::with('informasiObat')->findOrFail($id);
-        return view('obats.cetak', compact('obat'));
-    }
 
-    public function create()
+    public function create(): View
     {
         return view('obats.create');
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            // Data Obat
-            'nama_obat' => 'required|string|max:150',
-            'bentuk_sediaan' => 'required|in:tablet,kapsul,sirup,salep,krim, injeksi,lainnya',
-            'kekuatan_dosis' => 'required|string|max:50',
-            'stok' => 'required|integer|min:0',
+        $validated = $this->validateData($request);
 
-            // Informasi Obat
-            'indikasi_penyakit' => 'required|string',
-            'efek_samping_umum' => 'required|string',
-            'tanda_bahaya' => 'required|string',
-            'interaksi_obat' => 'required|string',
-            'interaksi_makanan' => 'required|string',
-            'penyimpanan_suhu' => 'required|in:rak,kulkas',
-            'hindari_cahaya' => 'nullable|boolean',
-            'hindari_kelembaban' => 'nullable|boolean',
-            'tidak_hentikan_mendadak' => 'nullable|boolean',
-            'harus_dihabiskan' => 'nullable|boolean',
-            'cara_penggunaan_khusus' => 'nullable|string'
-        ]);
+        DB::transaction(function () use ($validated) {
+            $obat = Obat::create([
+                'nama_obat' => $validated['nama_obat'],
+                'bentuk_sediaan' => $validated['bentuk_sediaan'],
+                'kekuatan_dosis' => $validated['kekuatan_dosis'],
+                'stok' => $validated['stok'],
+            ]);
 
-        // Simpan data obat
-        $obat = Obat::create([
-            'nama_obat' => $request->nama_obat,
-            'bentuk_sediaan' => $request->bentuk_sediaan,
-            'kekuatan_dosis' => $request->kekuatan_dosis,
-            'stok' => $request->stok
-        ]);
+            InformasiObat::create([
+                'obat_id' => $obat->id,
+                'indikasi_penyakit' => $validated['indikasi_penyakit'],
+                'efek_samping_umum' => $validated['efek_samping_umum'],
+                'tanda_bahaya' => $validated['tanda_bahaya'],
+                'interaksi_obat' => $validated['interaksi_obat'],
+                'interaksi_makanan' => $validated['interaksi_makanan'],
+                'penyimpanan_suhu' => $validated['penyimpanan_suhu'],
+                'hindari_cahaya' => (bool) ($validated['hindari_cahaya'] ?? false),
+                'hindari_kelembaban' => (bool) ($validated['hindari_kelembaban'] ?? false),
+                'tidak_hentikan_mendadak' => (bool) ($validated['tidak_hentikan_mendadak'] ?? false),
+                'harus_dihabiskan' => (bool) ($validated['harus_dihabiskan'] ?? false),
+                'cara_penggunaan_khusus' => $validated['cara_penggunaan_khusus'] ?? null,
+            ]);
+        });
 
-        // Simpan informasi obat
-        InformasiObat::create([
-            'obat_id' => $obat->id,
-            'indikasi_penyakit' => $request->indikasi_penyakit,
-            'efek_samping_umum' => $request->efek_samping_umum,
-            'tanda_bahaya' => $request->tanda_bahaya,
-            'interaksi_obat' => $request->interaksi_obat,
-            'interaksi_makanan' => $request->interaksi_makanan,
-            'penyimpanan_suhu' => $request->penyimpanan_suhu,
-            'hindari_cahaya' => $request->has('hindari_cahaya'),
-            'hindari_kelembaban' => $request->has('hindari_kelembaban'),
-            'tidak_hentikan_mendadak' => $request->has('tidak_hentikan_mendadak'),
-            'harus_dihabiskan' => $request->has('harus_dihabiskan'),
-            'cara_penggunaan_khusus' => $request->cara_penggunaan_khusus
-        ]);
-
-        return redirect()->route('obats.index')->with('success', 'Data obat berhasil ditambahkan!');
+        return redirect()
+            ->route('obats.index')
+            ->with('success', 'Data obat berhasil ditambahkan!');
     }
 
-    public function edit($id)
+    public function show(int $id): View
     {
         $obat = Obat::with('informasiObat')->findOrFail($id);
+
+        return view('obats.show', compact('obat'));
+    }
+
+    public function edit(int $id): View
+    {
+        $obat = Obat::with('informasiObat')->findOrFail($id);
+
         return view('obats.edit', compact('obat'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, int $id): RedirectResponse
     {
-        $request->validate([
-            'nama_obat' => 'required|string|max:150',
-            'bentuk_sediaan' => 'required|in:tablet,kapsul,sirup,salep,krim, injeksi,lainnya',
-            'kekuatan_dosis' => 'required|string|max:50',
-            'stok' => 'required|integer|min:0',
-            'indikasi_penyakit' => 'required|string',
-            'efek_samping_umum' => 'required|string',
-            'tanda_bahaya' => 'required|string',
-            'interaksi_obat' => 'required|string',
-            'interaksi_makanan' => 'required|string',
-            'penyimpanan_suhu' => 'required|in:rak,kulkas',
-        ]);
+        $validated = $this->validateData($request);
 
+        DB::transaction(function () use ($validated, $id) {
+            $obat = Obat::findOrFail($id);
+
+            $obat->update([
+                'nama_obat' => $validated['nama_obat'],
+                'bentuk_sediaan' => $validated['bentuk_sediaan'],
+                'kekuatan_dosis' => $validated['kekuatan_dosis'],
+                'stok' => $validated['stok'],
+            ]);
+
+            InformasiObat::updateOrCreate(
+                ['obat_id' => $obat->id],
+                [
+                    'indikasi_penyakit' => $validated['indikasi_penyakit'],
+                    'efek_samping_umum' => $validated['efek_samping_umum'],
+                    'tanda_bahaya' => $validated['tanda_bahaya'],
+                    'interaksi_obat' => $validated['interaksi_obat'],
+                    'interaksi_makanan' => $validated['interaksi_makanan'],
+                    'penyimpanan_suhu' => $validated['penyimpanan_suhu'],
+                    'hindari_cahaya' => (bool) ($validated['hindari_cahaya'] ?? false),
+                    'hindari_kelembaban' => (bool) ($validated['hindari_kelembaban'] ?? false),
+                    'tidak_hentikan_mendadak' => (bool) ($validated['tidak_hentikan_mendadak'] ?? false),
+                    'harus_dihabiskan' => (bool) ($validated['harus_dihabiskan'] ?? false),
+                    'cara_penggunaan_khusus' => $validated['cara_penggunaan_khusus'] ?? null,
+                ]
+            );
+        });
+
+        return redirect()
+            ->route('obats.index')
+            ->with('success', 'Data obat berhasil diperbarui!');
+    }
+
+    public function destroy(int $id): RedirectResponse
+    {
         $obat = Obat::findOrFail($id);
-        $obat->update([
-            'nama_obat' => $request->nama_obat,
-            'bentuk_sediaan' => $request->bentuk_sediaan,
-            'kekuatan_dosis' => $request->kekuatan_dosis,
-            'stok' => $request->stok
-        ]);
 
-        // Update atau create informasi obat
-        $informasi = InformasiObat::where('obat_id', $obat->id)->first();
-        if ($informasi) {
-            $informasi->update([
-                'indikasi_penyakit' => $request->indikasi_penyakit,
-                'efek_samping_umum' => $request->efek_samping_umum,
-                'tanda_bahaya' => $request->tanda_bahaya,
-                'interaksi_obat' => $request->interaksi_obat,
-                'interaksi_makanan' => $request->interaksi_makanan,
-                'penyimpanan_suhu' => $request->penyimpanan_suhu,
-                'hindari_cahaya' => $request->has('hindari_cahaya'),
-                'hindari_kelembaban' => $request->has('hindari_kelembaban'),
-                'tidak_hentikan_mendadak' => $request->has('tidak_hentikan_mendadak'),
-                'harus_dihabiskan' => $request->has('harus_dihabiskan'),
-                'cara_penggunaan_khusus' => $request->cara_penggunaan_khusus
-            ]);
-        } else {
-            InformasiObat::create([
-                'obat_id' => $obat->id,
-                'indikasi_penyakit' => $request->indikasi_penyakit,
-                'efek_samping_umum' => $request->efek_samping_umum,
-                'tanda_bahaya' => $request->tanda_bahaya,
-                'interaksi_obat' => $request->interaksi_obat,
-                'interaksi_makanan' => $request->interaksi_makanan,
-                'penyimpanan_suhu' => $request->penyimpanan_suhu,
-                'hindari_cahaya' => $request->has('hindari_cahaya'),
-                'hindari_kelembaban' => $request->has('hindari_kelembaban'),
-                'tidak_hentikan_mendadak' => $request->has('tidak_hentikan_mendadak'),
-                'harus_dihabiskan' => $request->has('harus_dihabiskan'),
-                'cara_penggunaan_khusus' => $request->cara_penggunaan_khusus
-            ]);
+        if ($obat->pemberianObat()->exists()) {
+            return back()->with('error', 'Obat tidak dapat dihapus karena sudah digunakan dalam data pemberian obat.');
         }
 
-        return redirect()->route('obats.index')->with('success', 'Data obat berhasil diupdate!');
-    }
-
-    public function destroy($id)
-    {
-        $obat = Obat::findOrFail($id);
         $obat->delete();
 
-        return redirect()->route('obats.index')->with('success', 'Data obat berhasil dihapus!');
+        return redirect()
+            ->route('obats.index')
+            ->with('success', 'Data obat berhasil dihapus!');
     }
 
-    public function show($id)
+    public function cetak(int $id): View
     {
         $obat = Obat::with('informasiObat')->findOrFail($id);
-        return view('obats.show', compact('obat'));
+
+        return view('obats.cetak', compact('obat'));
+    }
+
+    private function validateData(Request $request): array
+    {
+        return $request->validate([
+            'nama_obat' => ['required', 'string', 'max:150'],
+            'bentuk_sediaan' => ['required', 'in:tablet,kapsul,sirup,salep,krim,injeksi,sachet,lainnya'],
+            'kekuatan_dosis' => ['required', 'string', 'max:50'],
+            'stok' => ['required', 'integer', 'min:0'],
+
+            'indikasi_penyakit' => ['required', 'string'],
+            'efek_samping_umum' => ['required', 'string'],
+            'tanda_bahaya' => ['required', 'string'],
+            'interaksi_obat' => ['required', 'string'],
+            'interaksi_makanan' => ['required', 'string'],
+            'penyimpanan_suhu' => ['required', 'in:rak,kulkas'],
+
+            'hindari_cahaya' => ['nullable', 'boolean'],
+            'hindari_kelembaban' => ['nullable', 'boolean'],
+            'tidak_hentikan_mendadak' => ['nullable', 'boolean'],
+            'harus_dihabiskan' => ['nullable', 'boolean'],
+            'cara_penggunaan_khusus' => ['nullable', 'string'],
+        ]);
     }
 }

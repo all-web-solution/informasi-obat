@@ -1,104 +1,89 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <title>Resep Obat - {{ $pemberianObat->pasien->nama }}</title>
-    <style>
-        body {
-            font-family: 'Times New Roman', Times, serif;
-            margin: 20px;
-        }
-        .header {
-            text-align: center;
-            border-bottom: 2px solid #000;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-        }
-        .resep-title {
-            text-align: center;
-            font-size: 24px;
-            margin: 20px 0;
-        }
-        .info-pasien {
-            margin-bottom: 30px;
-        }
-        .info-pasien table {
-            width: 100%;
-        }
-        .info-pasien td {
-            padding: 5px;
-        }
-        .obat-info {
-            margin: 30px 0;
-            border: 1px solid #ddd;
-            padding: 15px;
-        }
-        .footer {
-            margin-top: 50px;
-            text-align: right;
-        }
-        @media print {
-            .btn-print {
-                display: none;
-            }
-        }
-        .btn-print {
-            background: #007bff;
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            cursor: pointer;
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
-<body>
-    <button class="btn-print" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
-    
-    <div class="header">
-        <h2>KLINIK SEHAT SEJAHTERA</h2>
-        <p>Jl. Kesehatan No. 123, Telp. (021) 1234567</p>
-        <p>Resep Obat</p>
+@extends('layouts.print')
+
+@section('title', 'Cetak Detail Pemberian Obat')
+@section('print-title', 'Detail Pemberian Obat')
+@section('print-subtitle', 'Informasi obat dan edukasi pasien')
+
+@section('content')
+@php
+    $info = $pemberianObat->informasiLengkap();
+@endphp
+
+<div class="print-summary-grid">
+    <div class="print-summary-card">
+        <div class="print-summary-label">Tanggal</div>
+        <div class="print-summary-value" style="font-size:16px;">
+            {{ $pemberianObat->tanggal_pemberian ? \Carbon\Carbon::parse($pemberianObat->tanggal_pemberian)->format('d/m/Y') : '-' }}
+        </div>
     </div>
-    
-    <div class="resep-title">
-        <strong>RESEP OBAT</strong>
+
+    <div class="print-summary-card">
+        <div class="print-summary-label">Pasien</div>
+        <div class="print-summary-value" style="font-size:16px;">{{ $pemberianObat->pasien->nama ?? '-' }}</div>
     </div>
-    
-    <div class="info-pasien">
-        <table>
-            <tr><td width="120">Nama Pasien</td><td>: <strong>{{ $pemberianObat->pasien->nama }}</strong></td></tr>
-            <tr><td>Umur</td><td>: {{ $pemberianObat->pasien->umur }} tahun</td></tr>
-            <tr><td>Jenis Kelamin</td><td>: {{ $pemberianObat->pasien->jenis_kelamin }}</td></tr>
-            <tr><td>Tanggal</td><td>: {{ date('d/m/Y', strtotime($pemberianObat->tanggal_pemberian)) }}</td></tr>
-        </table>
+
+    <div class="print-summary-card">
+        <div class="print-summary-label">Obat</div>
+        <div class="print-summary-value" style="font-size:16px;">{{ $pemberianObat->nama_obat_display }}</div>
     </div>
-    
-    <div class="obat-info">
-        <h4>Diagnosa / Keluhan:</h4>
-        <p>{{ $pemberianObat->diagnosa_keluhan }}</p>
-        
-        <h4>Nama Obat:</h4>
-        <p><strong>{{ $pemberianObat->obat }}</strong></p>
-        
-        <h4>Aturan Pakai:</h4>
-        <ul>
-            <li>{{ $pemberianObat->berapa_kali_sehari }} kali sehari</li>
-            <li>{{ ucfirst($pemberianObat->sebelum_sesudah_makan) }}</li>
-            <li>Lama penggunaan: {{ $pemberianObat->lama_penggunaan_hari }} hari</li>
-        </ul>
-        
-        @if($pemberianObat->informasi_tambahan)
-        <h4>Informasi Tambahan:</h4>
-        <p>{{ $pemberianObat->informasi_tambahan }}</p>
-        @endif
+
+    <div class="print-summary-card">
+        <div class="print-summary-label">Jumlah</div>
+        <div class="print-summary-value">{{ $pemberianObat->jumlah }}</div>
     </div>
-    
-    <div class="footer">
-        <p>Dokter,</p>
-        <br><br>
-        <p>(_________________)</p>
-        <p>STR: 12345/XX/YYYY</p>
-    </div>
-</body>
-</html>
+</div>
+
+<h3 class="print-section-title">Informasi Pemberian</h3>
+<table class="print-table">
+    <tr>
+        <th style="width: 220px;">Aturan Pakai</th>
+        <td>{{ $pemberianObat->aturan_pakai_display }}</td>
+    </tr>
+    <tr>
+        <th>Diagnosa/Keluhan</th>
+        <td>{{ $pemberianObat->diagnosa_keluhan }}</td>
+    </tr>
+    <tr>
+        <th>Informasi Tambahan</th>
+        <td>{{ $pemberianObat->informasi_tambahan ?: '-' }}</td>
+    </tr>
+</table>
+
+<h3 class="print-section-title">Edukasi Obat</h3>
+<table class="print-table">
+    <tr>
+        <th style="width: 220px;">Indikasi</th>
+        <td>{{ $info->indikasi }}</td>
+    </tr>
+    <tr>
+        <th>Efek Samping Umum</th>
+        <td>{{ $info->efek_samping }}</td>
+    </tr>
+    <tr>
+        <th>Tanda Bahaya</th>
+        <td>{{ $info->tanda_bahaya }}</td>
+    </tr>
+    <tr>
+        <th>Interaksi Obat</th>
+        <td>{{ $info->interaksi_obat }}</td>
+    </tr>
+    <tr>
+        <th>Interaksi Makanan</th>
+        <td>{{ $info->interaksi_makanan }}</td>
+    </tr>
+    <tr>
+        <th>Penyimpanan</th>
+        <td>{{ $info->penyimpanan }}</td>
+    </tr>
+    <tr>
+        <th>Hal Khusus</th>
+        <td>
+            @forelse($info->hal_khusus as $item)
+                <span class="print-badge">{{ $item }}</span>
+            @empty
+                -
+            @endforelse
+        </td>
+    </tr>
+</table>
+@endsection

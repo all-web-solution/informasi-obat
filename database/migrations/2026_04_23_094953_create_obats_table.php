@@ -6,24 +6,31 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('obats', function (Blueprint $table) {
             $table->id();
             $table->string('nama_obat', 150);
-            $table->enum('bentuk_sediaan', ['tablet', 'kapsul', 'sirup', 'salep', 'krim', 'injeksi', 'lainnya']);
+            $table->enum('bentuk_sediaan', [
+                'tablet',
+                'kapsul',
+                'sirup',
+                'salep',
+                'krim',
+                'injeksi',
+                'sachet',
+                'lainnya',
+            ]);
             $table->string('kekuatan_dosis', 50);
-            $table->integer('stok');
+            $table->unsignedInteger('stok')->default(0);
             $table->timestamps();
+
+            $table->index('nama_obat');
+            $table->index('bentuk_sediaan');
+            $table->index('stok');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('obats');

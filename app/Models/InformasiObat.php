@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class InformasiObat extends Model
 {
     protected $table = 'informasi_obats';
+
     protected $fillable = [
         'obat_id',
         'indikasi_penyakit',
@@ -19,7 +21,7 @@ class InformasiObat extends Model
         'hindari_kelembaban',
         'tidak_hentikan_mendadak',
         'harus_dihabiskan',
-        'cara_penggunaan_khusus'
+        'cara_penggunaan_khusus',
     ];
 
     protected $casts = [
@@ -29,7 +31,7 @@ class InformasiObat extends Model
         'harus_dihabiskan' => 'boolean',
     ];
 
-    public function obat()
+    public function obat(): BelongsTo
     {
         return $this->belongsTo(Obat::class);
     }
