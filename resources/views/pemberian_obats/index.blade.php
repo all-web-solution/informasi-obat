@@ -9,7 +9,9 @@
     <div class="native-card-header">
         <div>
             <h1 class="native-card-title">Data Pemberian Obat</h1>
-            <p class="native-card-subtitle">Daftar pemberian obat beserta pasien, obat, aturan pakai, dan diagnosa.</p>
+            <p class="native-card-subtitle">
+                Daftar pemberian obat dengan format obat dan aturan pakai dalam satu field.
+            </p>
         </div>
 
         <div class="native-actions">
@@ -34,20 +36,18 @@
             </div>
 
             <div class="native-form-group">
-                <label>Filter Obat</label>
-                <select name="filter_obat">
-                    <option value="">Semua Obat</option>
-                    @foreach($obats as $obat)
-                        <option value="{{ $obat->id }}" @selected(request('filter_obat') == $obat->id)>
-                            {{ $obat->nama_obat }} {{ $obat->kekuatan_dosis }}
-                        </option>
-                    @endforeach
-                </select>
+                <label>Filter Tanggal</label>
+                <input type="date" name="filter_tanggal" value="{{ request('filter_tanggal') }}">
             </div>
 
             <div class="native-form-group">
-                <label>Filter Tanggal</label>
-                <input type="date" name="filter_tanggal" value="{{ request('filter_tanggal') }}">
+                <label>Cari Obat/Diagnosa</label>
+                <input
+                    type="text"
+                    name="filter_keyword"
+                    value="{{ request('filter_keyword') }}"
+                    placeholder="Cari nama obat, aturan pakai, diagnosa..."
+                >
             </div>
 
             <div class="native-actions" style="align-items:end;">
@@ -68,8 +68,7 @@
                     <th>No</th>
                     <th>Tanggal</th>
                     <th>Pasien</th>
-                    <th>Obat</th>
-                    <th>Aturan Pakai</th>
+                    <th>Obat dan Aturan Pakai</th>
                     <th>Diagnosa/Keluhan</th>
                     <th>Aksi</th>
                 </tr>
@@ -88,19 +87,17 @@
                         <td>
                             <div class="medicine-card-inline">
                                 <div class="medicine-icon">
-                                    <i class="fas fa-capsules"></i>
+                                    <i class="fas fa-prescription-bottle-medical"></i>
                                 </div>
                                 <div>
-                                    <div class="medicine-name">{{ $item->nama_obat_display }}</div>
-                                    <div class="medicine-meta">{{ $item->detail_obat_display }}</div>
-                                    <div class="medicine-badges">
-                                        <span class="medicine-badge">{{ $item->jumlah }} unit</span>
+                                    <div class="medicine-name">Obat & Aturan Pakai</div>
+                                    <div class="medicine-meta">
+                                        {{ $item->ringkasan_obat }}
                                     </div>
                                 </div>
                             </div>
                         </td>
-                        <td>{{ $item->aturan_pakai_display }}</td>
-                        <td>{{ \Illuminate\Support\Str::limit($item->diagnosa_keluhan, 70) }}</td>
+                        <td>{{ \Illuminate\Support\Str::limit($item->diagnosa_keluhan, 80) }}</td>
                         <td>
                             <div class="native-actions" style="justify-content:flex-start;">
                                 <a href="{{ route('pemberian_obats.show', $item) }}" class="native-btn native-btn-secondary">
@@ -114,7 +111,7 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7">Belum ada data pemberian obat.</td>
+                        <td colspan="6">Belum ada data pemberian obat.</td>
                     </tr>
                 @endforelse
             </tbody>

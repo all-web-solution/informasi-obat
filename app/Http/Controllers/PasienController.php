@@ -53,14 +53,11 @@ class PasienController extends Controller
 
     public function show(int $id): View
     {
-        $pasien = Pasien::with([
-            'pemberianObat.obat.informasiObat',
-        ])->findOrFail($id);
+        $pasien = Pasien::findOrFail($id);
 
-        $totalPemberian = $pasien->pemberianObat->count();
+        $totalPemberian = $pasien->pemberianObat()->count();
 
         $riwayatObat = $pasien->pemberianObat()
-            ->with('obat.informasiObat')
             ->orderByDesc('tanggal_pemberian')
             ->orderByDesc('id')
             ->get();
@@ -97,13 +94,13 @@ class PasienController extends Controller
 
     public function cetak(int $id): View
     {
-        $pasien = Pasien::with('pemberianObat.obat.informasiObat')->findOrFail($id);
+        $pasien = Pasien::findOrFail($id);
 
-        $totalPemberian = $pasien->pemberianObat->count();
+        $totalPemberian = $pasien->pemberianObat()->count();
 
         $riwayatObat = $pasien->pemberianObat()
-            ->with('obat.informasiObat')
             ->orderByDesc('tanggal_pemberian')
+            ->orderByDesc('id')
             ->get();
 
         return view('pasiens.cetak', compact('pasien', 'totalPemberian', 'riwayatObat'));

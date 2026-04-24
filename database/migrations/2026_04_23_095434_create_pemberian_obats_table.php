@@ -15,27 +15,15 @@ return new class extends Migration
                 ->constrained('pasiens')
                 ->cascadeOnDelete();
 
-            $table->foreignId('obat_id')
-                ->constrained('obats')
-                ->restrictOnDelete();
-
-            $table->unsignedInteger('jumlah')->default(1);
-            $table->unsignedTinyInteger('berapa_kali_sehari');
-            $table->enum('sebelum_sesudah_makan', [
-                'sebelum makan',
-                'sesudah makan',
-                'tidak berpengaruh'
-            ]);
-
-            $table->unsignedSmallInteger('lama_penggunaan_hari');
-            $table->text('informasi_tambahan')->nullable();
+            $table->text('obat_aturan_pakai');
             $table->date('tanggal_pemberian');
             $table->text('diagnosa_keluhan');
+            $table->text('informasi_tambahan')->nullable();
 
             $table->timestamps();
 
             $table->index(['pasien_id', 'tanggal_pemberian']);
-            $table->index(['obat_id', 'tanggal_pemberian']);
+            $table->index('tanggal_pemberian');
         });
     }
 

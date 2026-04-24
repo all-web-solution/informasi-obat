@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Obat;
 use App\Models\Pasien;
 use App\Models\PemberianObat;
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -22,7 +21,6 @@ class LaporanController extends Controller
             'total_pasien' => Pasien::count(),
             'total_obat' => Obat::count(),
             'total_pemberian' => (clone $pemberianQuery)->count(),
-            'total_jumlah_obat_diberikan' => (clone $pemberianQuery)->sum('jumlah'),
             'stok_menipis' => Obat::where('stok', '>', 0)->where('stok', '<=', 10)->count(),
             'stok_habis' => Obat::where('stok', 0)->count(),
         ];
@@ -31,16 +29,6 @@ class LaporanController extends Controller
             ->selectRaw('tanggal_pemberian, COUNT(*) as total')
             ->groupBy('tanggal_pemberian')
             ->orderBy('tanggal_pemberian')
-            ->get();
-
-        $topObats = PemberianObat::query()
-            ->selectRaw('obat_id, COUNT(*) as total_pemberian, SUM(jumlah) as total_jumlah')
-            ->with('obat:id,nama_obat,bentuk_sediaan,kekuatan_dosis,stok')
-            ->when($filters['tanggal_awal'], fn (Builder $query) => $query->whereDate('tanggal_pemberian', '>=', $filters['tanggal_awal']))
-            ->when($filters['tanggal_akhir'], fn (Builder $query) => $query->whereDate('tanggal_pemberian', '<=', $filters['tanggal_akhir']))
-            ->groupBy('obat_id')
-            ->orderByDesc('total_pemberian')
-            ->limit(5)
             ->get();
 
         $topPasiens = PemberianObat::query()
@@ -80,10 +68,7 @@ class LaporanController extends Controller
         ];
 
         $latestPemberian = (clone $pemberianQuery)
-            ->with([
-                'pasien:id,nama,umur,jenis_kelamin',
-                'obat:id,nama_obat,bentuk_sediaan,kekuatan_dosis,stok',
-            ])
+            ->with('pasien:id,nama,umur,jenis_kelamin')
             ->orderByDesc('tanggal_pemberian')
             ->orderByDesc('id')
             ->limit(10)
@@ -93,7 +78,6 @@ class LaporanController extends Controller
             'filters',
             'summary',
             'pemberianPerHari',
-            'topObats',
             'topPasiens',
             'stokKritis',
             'obatPerluPerhatian',
@@ -120,7 +104,6 @@ class LaporanController extends Controller
 
         $obats = Obat::query()
             ->with('informasiObat')
-            ->withCount('pemberianObat')
             ->orderBy('nama_obat')
             ->get();
 
@@ -132,10 +115,7 @@ class LaporanController extends Controller
         $filters = $this->filters($request);
 
         $pemberianObats = $this->basePemberianQuery($filters)
-            ->with([
-                'pasien:id,nama,umur,jenis_kelamin',
-                'obat:id,nama_obat,bentuk_sediaan,kekuatan_dosis',
-            ])
+            ->with('pasien:id,nama,umur,jenis_kelamin')
             ->orderByDesc('tanggal_pemberian')
             ->orderByDesc('id')
             ->get();

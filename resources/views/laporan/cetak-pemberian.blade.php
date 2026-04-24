@@ -11,8 +11,8 @@
         <div class="print-summary-value">{{ $pemberianObats->count() }}</div>
     </div>
     <div class="print-summary-card">
-        <div class="print-summary-label">Total Jumlah Obat</div>
-        <div class="print-summary-value">{{ $pemberianObats->sum('jumlah') }}</div>
+        <div class="print-summary-label">Total Pasien Unik</div>
+        <div class="print-summary-value">{{ $pemberianObats->pluck('pasien_id')->unique()->count() }}</div>
     </div>
     <div class="print-summary-card">
         <div class="print-summary-label">Tanggal Awal</div>
@@ -34,9 +34,7 @@
             <th>No</th>
             <th>Tanggal</th>
             <th>Pasien</th>
-            <th>Obat</th>
-            <th>Jumlah</th>
-            <th>Aturan Pakai</th>
+            <th>Obat dan Aturan Pakai</th>
             <th>Diagnosa/Keluhan</th>
             <th>Info Tambahan</th>
         </tr>
@@ -50,18 +48,13 @@
                     <strong>{{ $item->pasien->nama ?? '-' }}</strong><br>
                     <small>{{ $item->pasien->jenis_kelamin ?? '-' }} | {{ $item->pasien->umur ?? '-' }} tahun</small>
                 </td>
-                <td>
-                    <strong>{{ $item->nama_obat_display }}</strong><br>
-                    <small>{{ $item->detail_obat_display }}</small>
-                </td>
-                <td>{{ $item->jumlah }}</td>
-                <td>{{ $item->aturan_pakai_display }}</td>
-                <td>{{ $item->diagnosa_keluhan }}</td>
-                <td>{{ $item->informasi_tambahan ?: '-' }}</td>
+                <td style="white-space: pre-line;">{{ $item->obat_aturan_pakai }}</td>
+                <td style="white-space: pre-line;">{{ $item->diagnosa_keluhan }}</td>
+                <td style="white-space: pre-line;">{{ $item->informasi_tambahan ?: '-' }}</td>
             </tr>
         @empty
             <tr>
-                <td colspan="8">Belum ada data pemberian obat pada periode ini.</td>
+                <td colspan="6">Belum ada data pemberian obat pada periode ini.</td>
             </tr>
         @endforelse
     </tbody>
